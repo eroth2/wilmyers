@@ -1,1 +1,49 @@
+#Eric Roth Wil Myers Project
+
+###############################################
+
+#scrape Wil Myer's pitch by pitch data from 2019 & 2020
+
+playerid_lookup(last_name = "Myers", first_name = "Wil") %>% view()
+scrape_statcast_savant_batter(start_date = "2019-3-28", end_date = "2019-9-29",
+                              batterid = 571976) -> wmyers19
+scrape_statcast_savant_batter(start_date = "2020-7-23", end_date = "2020-9-26",
+                              batterid = 571976) -> wmyers20
+                              
+#trim down to just balls put in play and make xwoba numeric        
+wmyers19 %>% filter(type == "X") -> wmyers19_bip
+wmyers20 %>% filter(type == "X") -> wmyers20_bip
+
+as.numeric(wmyers19$estimated_woba_using_speedangle) -> wmyers19$estimated_woba_using_speedangle
+as.numeric(wmyers20$estimated_woba_using_speedangle) -> wmyers20$estimated_woba_using_speedangle
+
+#create launch angle + exit velo with relation to xwoba chart
+ggplot(wmyers19_bip, aes(launch_speed, launch_angle)) + geom_point(aes(color = estimated_woba_using_speedangle)) +
+  scale_color_gradient(low = "blue", high = "red") + easy_add_legend_title("xWOBA") +
+  geom_hline(yintercept = 25, linetype = "dashed") + geom_hline(yintercept = 35, linetype = "dashed") +
+  geom_vline(xintercept = 95, linetype = "dashed") + 
+  annotate(geom = "text", x = 40, y = 20, label = "25°") +
+  annotate(geom = "text", x = 40, y = 40, label = "35°") +
+  annotate(geom = "text", x = 101, y = -80, label = "95 mph") + 
+  xlab("Exit Velocity (MPH)") + ylab("Launch Angle (Degrees)") +
+  labs(title = "2019 Launch Angle, Exit Velo, & xWOBA Relation") + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) -> wmyers19_LA_EV
+  
+ ggplot(wmyers20_bip, aes(launch_speed, launch_angle)) + geom_point(aes(color = estimated_woba_using_speedangle)) +
+  scale_color_gradient(low = "blue", high = "red") + easy_add_legend_title("xWOBA")+
+  geom_hline(yintercept = 25, linetype = "dashed") + geom_hline(yintercept = 35, linetype = "dashed") +
+  geom_vline(xintercept = 95, linetype = "dashed") + 
+  annotate(geom = "text", x = 33, y = 20, label = "25°") +
+  annotate(geom = "text", x = 33, y = 40, label = "35°") +
+  annotate(geom = "text", x = 101, y = -80, label = "95 mph") + 
+  xlab("Exit Velocity (MPH)") + ylab("Launch Angle (Degrees)") +
+  labs(title = "2020 Launch Angle, Exit Velo, & xWOBA Relation") + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) -> wmyers20_LA_EV
+
+
+
+
+
+
+
 
