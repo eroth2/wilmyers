@@ -9,7 +9,25 @@ scrape_statcast_savant_batter(start_date = "2019-3-28", end_date = "2019-9-29",
                               batterid = 571976) -> wmyers19
 scrape_statcast_savant_batter(start_date = "2020-7-23", end_date = "2020-9-26",
                               batterid = 571976) -> wmyers20
+
+#group all swing and misses together
+ifelse(wmyers19$description == "swinging_strike_blocked", "swinging_strike", wmyers19$description) -> wmyers19$description
+ifelse(wmyers20$description == "swinging_strike_blocked", "swinging_strike", wmyers20$description) -> wmyers20$description
                               
+#Rename pitch_types
+ifelse(wmyers19$pitch_type == "KC", "KNCU", wmyers19$pitch_type) -> wmyers19$pitch_type
+ifelse(wmyers19$pitch_type == "FC", "CUT", wmyers19$pitch_type) -> wmyers19$pitch_type
+ifelse(wmyers19$pitch_type == "FF", "4sm", wmyers19$pitch_type) -> wmyers19$pitch_type
+ifelse(wmyers19$pitch_type == "FT", "2sm", wmyers19$pitch_type) -> wmyers19$pitch_type
+ifelse(wmyers19$pitch_type == "FS", "SPL", wmyers19$pitch_type) -> wmyers19$pitch_type
+ifelse(wmyers19$pitch_type == "SI", "SNK", wmyers19$pitch_type) -> wmyers19$pitch_type
+
+ifelse(wmyers20$pitch_type == "KC", "KNCU", wmyers20$pitch_type) -> wmyers20$pitch_type
+ifelse(wmyers20$pitch_type == "FC", "CUT", wmyers20$pitch_type) -> wmyers20$pitch_type
+ifelse(wmyers20$pitch_type == "FF", "4sm", wmyers20$pitch_type) -> wmyers20$pitch_type
+ifelse(wmyers20$pitch_type == "FS", "SPL", wmyers20$pitch_type) -> wmyers20$pitch_type
+ifelse(wmyers20$pitch_type == "SI", "SNK", wmyers20$pitch_type) -> wmyers20$pitch_type
+
 #trim down to just balls put in play and make xwoba numeric        
 wmyers19 %>% filter(type == "X") -> wmyers19_bip
 wmyers20 %>% filter(type == "X") -> wmyers20_bip
@@ -51,6 +69,50 @@ unique(wmyers19$pitch_type)
 unique(wmyers20$pitch_type)
 wmyers19 %>% subset(pitch_type!= "null") -> wmyers19
 wmyers20 %>% subset(pitch_type!= "null") -> wmyers20
+
+#create strike zone heat map function
+k_zone_heatmap <- function(...) {
+  k_zone_plot(...) +
+    stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+    scale_fill_distiller(palette= "Spectral", direction=-1) + 
+    geom_rect(xmin = -(plate_width/2)/12,
+              xmax = (plate_width/2)/12,
+              ymin = 1.5,
+              ymax = 3.6, color = "black", alpha = 0) +
+    coord_equal() + 
+    scale_x_continuous("Horizontal location (ft.)",
+                       limits = c(-2,2)) +
+    scale_y_continuous("Vertical location (ft.) RHB POV",
+                       limits = c(0,5))
+}
+
+#Plot pitches seen with whiffs highlighted
+wmyers19 %>% mutate(swing_and_miss = ifelse(wmyers19$description == "swinging_strike", "Whiff", "other")) %>% 
+  k_zone_heatmap(aes(plate_x, plate_z, color = swing_and_miss)) +
+  geom_point(alpha = .5) + scale_color_manual(values = c("black", "red")) + facet_wrap(~pitch_type, nrow = 3) +
+  easy_add_legend_title("Swing and Miss?\n(yellow = Density)") + 
+  labs(title = "Myers 2019 Pitches Seen vs RHP")
+
+wmyers20 %>% mutate(swing_and_miss = ifelse(wmyers20$description == "swinging_strike", "Whiff", "other")) %>% 
+  k_zone_heatmap(aes(plate_x, plate_z, color = swing_and_miss)) +
+  geom_point(alpha = .6) + scale_color_manual(values = c("black", "red")) + facet_wrap(~pitch_type, nrow = 3) +
+  easy_add_legend_title("Swing and Miss?\n(yellow = Density)") +
+  labs(title = "Myers 2020 Pitches Seen vs RHP")
+
+#find first pitch swing % vs R
+nrow(wmyers19_R %>% filter(description == "swinging_strike" | description == "hit_into_play" |
+                      description == "foul" | description == "hit_into_play_no_out" |
+                      description == "hit_into_play_score" | description == "foul_tip" |
+                      description == "foul_bunt") %>% filter(balls == 0 & strikes == 0))/
+  nrow(wmyers19_R %>% filter(balls == 0 & strikes == 0))
+
+nrow(wmyers20_R %>% filter(description == "swinging_strike" | description == "hit_into_play" |
+                           description == "foul" | description == "hit_into_play_no_out" |
+                           description == "hit_into_play_score" | description == "foul_tip" |
+                           description == "foul_bunt") %>% filter(balls == 0 & strikes == 0))/
+  nrow(wmyers20_R %>% filter(balls == 0 & strikes == 0))
+
+
 
 
 
