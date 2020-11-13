@@ -169,25 +169,33 @@ spray_chart(wmyers20_bip %>% filter(p_throws == "R"), aes(hc_x, -hc_y, color = b
   
 
 
+#Find % change in counts - Statistically insignificant so left out of write up
+wmyers19 %>% 
+  group_by(count) %>% 
+  summarize(n = n(),
+            pct19 = n/nrow(wmyers19)*100) %>% select(-n)
+wmyers20 %>% 
+  group_by(count) %>% 
+  summarize(n = n(),
+            pct20 = n/nrow(wmyers20)*100) %>% select(-n, -count)
+cbind(wmyers19 %>% 
+        group_by(count) %>% 
+        summarize(n = n(),
+                  pct19 = n/nrow(wmyers19)*100) %>% select(-n),wmyers20 %>% 
+        group_by(count) %>% 
+        summarize(n = n(),
+                  pct20 = n/nrow(wmyers20)*100) %>% select(-n, -count)) %>% 
+  mutate(pct_change = pct20 - pct19) -> wmyers_count_diff
 
+(round(prop.table(table(wmyers20$count, wmyers20$year),
+                 margin = 2), 2) - round(prop.table(table(wmyers19$count, wmyers19$year),
+                                                    margin = 2), 2)) * 100
 
+barplot(wmyers_count_diff$pct_change, names.arg = wmyers_count_diff$count)
 
+#####################################
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+End
 
 
 
