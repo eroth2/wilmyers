@@ -64,9 +64,12 @@ ggplot(wmyers19_bip, aes(launch_speed, launch_angle)) + geom_point(aes(color = e
   theme(plot.title = element_text(face = "bold", hjust = .5)) +
   xlim(c(40,110)) -> wmyers20_LA_EV
 
-#find "sweet spot" %
+#find "sweet spot" % and hard hit%
 nrow(wmyers19_bip %>% filter(launch_angle >= 25 & launch_angle <= 35))/nrow(wmyers19_bip)
 nrow(wmyers20_bip %>% filter(launch_angle >= 25 & launch_angle <= 35))/nrow(wmyers20_bip)
+
+nrow(wmyers19_bip %>% filter(launch_speed >= 95))/nrow(wmyers19_bip)
+nrow(wmyers20_bip %>% filter(launch_speed >= 95))/nrow(wmyers20_bip)
 
 #find all different pitches Myers has seen and omit "nulls"
 unique(wmyers19$pitch_type)
