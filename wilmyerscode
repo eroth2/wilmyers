@@ -39,35 +39,6 @@ wmyers20 %>% filter(type == "X") -> wmyers20_bip
 as.numeric(wmyers19$estimated_woba_using_speedangle) -> wmyers19$estimated_woba_using_speedangle
 as.numeric(wmyers20$estimated_woba_using_speedangle) -> wmyers20$estimated_woba_using_speedangle
 
-#VS righties when applicable
-
-#Create pitch percentage by count vs RHP
-wmyers19 %>% mutate(year = 2019) -> wmyers19
-wmyers20 %>% mutate(year = 2020) -> wmyers20
-as.character(wmyers19$year) -> wmyers19$year
-as.character(wmyers20$year) -> wmyers20$year
-
-wmyers19_R %>% group_by(pitch_type, year) %>% 
-  summarize(n = n(),
-            pct = n/nrow(wmyers19_R)*100) %>% select(-n) -> wmyers19_R_pct
-wmyers19_R_pct %>% mutate(pct = round(pct, digits = 1)) -> wmyers19_R_pct
-
-wmyers20_R %>% group_by(pitch_type, year) %>% 
-  summarize(n = n(),
-            pct = n/nrow(wmyers20_R)*100) %>% select(-n) -> wmyers20_R_pct
-wmyers20_R_pct %>% mutate(pct = round(pct, digits = 1)) -> wmyers20_R_pct
-
-rbind(wmyers19_R_pct, wmyers20_R_pct) -> wmyers_pct_combinedR
-
-#pitch distribution chart
-ggplot(wmyers_pct_combinedR, aes(reorder(pitch_type, -pct), pct, fill = year)) + 
-  geom_bar(stat = "identity", position = "dodge2") + 
-  scale_fill_manual(values = c("#8B4513", "yellow")) +
-  xlab("Pitch Type") + ylab("% Thrown")+
-  geom_text(aes(label = pct), position = position_dodge(width = .9), vjust = -.25, size = 2.5) +
-  labs(title = "Myers Pitch Distribution Seen Vs RHP") + 
-  theme(plot.title = element_text(face = "bold", hjust = .5)) -> wmyers19_R_pct_chart
-
 #create launch angle + exit velo with relation to xwoba chart
 ggplot(wmyers19_bip, aes(launch_speed, launch_angle)) + geom_point(aes(color = estimated_woba_using_speedangle)) +
   scale_color_gradient(low = "blue", high = "red") + easy_add_legend_title("xWOBA") +
@@ -102,6 +73,36 @@ unique(wmyers19$pitch_type)
 unique(wmyers20$pitch_type)
 wmyers19 %>% subset(pitch_type!= "null") -> wmyers19
 wmyers20 %>% subset(pitch_type!= "null") -> wmyers20
+
+############################
+#VS righties when applicable
+
+#Create pitch percentage by count vs RHP
+wmyers19 %>% mutate(year = 2019) -> wmyers19
+wmyers20 %>% mutate(year = 2020) -> wmyers20
+as.character(wmyers19$year) -> wmyers19$year
+as.character(wmyers20$year) -> wmyers20$year
+
+wmyers19_R %>% group_by(pitch_type, year) %>% 
+  summarize(n = n(),
+            pct = n/nrow(wmyers19_R)*100) %>% select(-n) -> wmyers19_R_pct
+wmyers19_R_pct %>% mutate(pct = round(pct, digits = 1)) -> wmyers19_R_pct
+
+wmyers20_R %>% group_by(pitch_type, year) %>% 
+  summarize(n = n(),
+            pct = n/nrow(wmyers20_R)*100) %>% select(-n) -> wmyers20_R_pct
+wmyers20_R_pct %>% mutate(pct = round(pct, digits = 1)) -> wmyers20_R_pct
+
+rbind(wmyers19_R_pct, wmyers20_R_pct) -> wmyers_pct_combinedR
+
+#pitch distribution chart
+ggplot(wmyers_pct_combinedR, aes(reorder(pitch_type, -pct), pct, fill = year)) + 
+  geom_bar(stat = "identity", position = "dodge2") + 
+  scale_fill_manual(values = c("#8B4513", "yellow")) +
+  xlab("Pitch Type") + ylab("% Thrown")+
+  geom_text(aes(label = pct), position = position_dodge(width = .9), vjust = -.25, size = 2.5) +
+  labs(title = "Myers Pitch Distribution Seen Vs RHP") + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) -> wmyers19_R_pct_chart
 
 #create strike zone heat map function
 k_zone_heatmap <- function(...) {
@@ -164,10 +165,11 @@ spray_chart(wmyers20_bip %>% filter(p_throws == "R"), aes(hc_x, -hc_y, color = b
   geom_point() + facet_wrap(~pitch_type, nrow = 3) + labs(title = "Myers 2020 Balls in Play vs RHP") +
   easy_add_legend_title("Batted Ball Type") -> wmyers20_R_pct
   
-  #VS lefties
+ 
+ ###################
+ #VS lefties
   repeat all RHP code but replace with LHP
   
-
 
 #Find % change in counts - Statistically insignificant so left out of write up
 wmyers19 %>% 
