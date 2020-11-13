@@ -39,6 +39,35 @@ wmyers20 %>% filter(type == "X") -> wmyers20_bip
 as.numeric(wmyers19$estimated_woba_using_speedangle) -> wmyers19$estimated_woba_using_speedangle
 as.numeric(wmyers20$estimated_woba_using_speedangle) -> wmyers20$estimated_woba_using_speedangle
 
+#VS righties
+
+#Create pitch percentage by count vs RHP
+wmyers19 %>% mutate(year = 2019) -> wmyers19
+wmyers20 %>% mutate(year = 2020) -> wmyers20
+as.character(wmyers19$year) -> wmyers19$year
+as.character(wmyers20$year) -> wmyers20$year
+
+wmyers19_R %>% group_by(pitch_type, year) %>% 
+  summarize(n = n(),
+            pct = n/nrow(wmyers19_R)*100) %>% select(-n) -> wmyers19_R_pct
+wmyers19_R_pct %>% mutate(pct = round(pct, digits = 1)) -> wmyers19_R_pct
+
+wmyers20_R %>% group_by(pitch_type, year) %>% 
+  summarize(n = n(),
+            pct = n/nrow(wmyers20_R)*100) %>% select(-n) -> wmyers20_R_pct
+wmyers20_R_pct %>% mutate(pct = round(pct, digits = 1)) -> wmyers20_R_pct
+
+rbind(wmyers19_R_pct, wmyers20_R_pct) -> wmyers_pct_combinedR
+
+#pitch distribution chart
+ggplot(wmyers_pct_combinedR, aes(reorder(pitch_type, -pct), pct, fill = year)) + 
+  geom_bar(stat = "identity", position = "dodge2") + 
+  scale_fill_manual(values = c("#8B4513", "yellow")) +
+  xlab("Pitch Type") + ylab("% Thrown")+
+  geom_text(aes(label = pct), position = position_dodge(width = .9), vjust = -.25, size = 2.5) +
+  labs(title = "Myers Pitch Distribution Seen Vs RHP") + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) -> wmyers19_R_pct_chart
+
 #create launch angle + exit velo with relation to xwoba chart
 ggplot(wmyers19_bip, aes(launch_speed, launch_angle)) + geom_point(aes(color = estimated_woba_using_speedangle)) +
   scale_color_gradient(low = "blue", high = "red") + easy_add_legend_title("xWOBA") +
@@ -121,15 +150,40 @@ nrow(wmyers20_R %>% filter(description == "swinging_strike" | description == "hi
                            description == "foul_bunt") %>% filter(balls == 0 & strikes == 0))/
   nrow(wmyers20_R %>% filter(balls == 0 & strikes == 0))
   
+ #Find pitch distribution based on count vs RHP
+round(prop.table(table(wmyers19_R$pitch_type, wmyers19_R$count),
+                 margin = 2), 2) -> wmyers19_countsR
+round(prop.table(table(wmyers20_R$pitch_type, wmyers20_R$count),
+                 margin = 2), 2) -> wmyers20_countsR
+ 
  #Create spray charts vs RHP separated by pitch type and colored by batted ball type
 spray_chart(wmyers19_bip %>% filter(p_throws == "R"), aes(hc_x, -hc_y, color = bb_type)) +
   geom_point() + facet_wrap(~pitch_type, nrow = 3) + labs(title = "Myers 2019 Balls in Play vs RHP") +
-  easy_add_legend_title("Batted Ball Type")
+  easy_add_legend_title("Batted Ball Type") -> wmyers19_R_pct
 spray_chart(wmyers20_bip %>% filter(p_throws == "R"), aes(hc_x, -hc_y, color = bb_type)) +
   geom_point() + facet_wrap(~pitch_type, nrow = 3) + labs(title = "Myers 2020 Balls in Play vs RHP") +
-  easy_add_legend_title("Batted Ball Type")
+  easy_add_legend_title("Batted Ball Type") -> wmyers20_R_pct
+  
+  #VS lefties
+  
+  
 
-#Create pitch percentage by count vs RHP
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
