@@ -28,6 +28,10 @@ ifelse(wmyers20$pitch_type == "FF", "4sm", wmyers20$pitch_type) -> wmyers20$pitc
 ifelse(wmyers20$pitch_type == "FS", "SPL", wmyers20$pitch_type) -> wmyers20$pitch_type
 ifelse(wmyers20$pitch_type == "SI", "SNK", wmyers20$pitch_type) -> wmyers20$pitch_type
 
+#create "count" column
+wmyers19 %>% mutate(count = paste(wmyers19$balls,"-",wmyers19$strikes)) -> wmyers19
+wmyers20 %>% mutate(count = paste(wmyers20$balls,"-",wmyers20$strikes)) -> wmyers20
+
 #trim down to just balls put in play and make xwoba numeric        
 wmyers19 %>% filter(type == "X") -> wmyers19_bip
 wmyers20 %>% filter(type == "X") -> wmyers20_bip
@@ -86,16 +90,21 @@ k_zone_heatmap <- function(...) {
                        limits = c(0,5))
 }
 
-#Plot pitches seen with whiffs highlighted
-wmyers19 %>% mutate(swing_and_miss = ifelse(wmyers19$description == "swinging_strike", "Whiff", "other")) %>% 
+#Plot pitches seen with whiffs highlighted and classify swing and misses
+wmyers19 %>% mutate(swing_and_miss = ifelse(wmyers19$description == "swinging_strike", "Whiff", "other")) -> wmyers19
+wmyers20 %>% mutate(swing_and_miss = ifelse(wmyers20$description == "swinging_strike", "Whiff", "other")) -> wmyers20
+
+wmyers19_R %>% 
   k_zone_heatmap(aes(plate_x, plate_z, color = swing_and_miss)) +
-  geom_point(alpha = .5) + scale_color_manual(values = c("black", "red")) + facet_wrap(~pitch_type, nrow = 3) +
+  geom_point(alpha = .5) + scale_color_manual(values = c("black", "red")) + 
+  facet_wrap(~pitch_type, nrow = 3) +
   easy_add_legend_title("Swing and Miss?\n(yellow = Density)") + 
   labs(title = "Myers 2019 Pitches Seen vs RHP")
 
-wmyers20 %>% mutate(swing_and_miss = ifelse(wmyers20$description == "swinging_strike", "Whiff", "other")) %>% 
+wmyers20_R %>% 
   k_zone_heatmap(aes(plate_x, plate_z, color = swing_and_miss)) +
-  geom_point(alpha = .6) + scale_color_manual(values = c("black", "red")) + facet_wrap(~pitch_type, nrow = 3) +
+  geom_point(alpha = .6) + scale_color_manual(values = c("black", "red")) + 
+  facet_wrap(~pitch_type, nrow = 3) +
   easy_add_legend_title("Swing and Miss?\n(yellow = Density)") +
   labs(title = "Myers 2020 Pitches Seen vs RHP")
 
@@ -111,8 +120,16 @@ nrow(wmyers20_R %>% filter(description == "swinging_strike" | description == "hi
                            description == "hit_into_play_score" | description == "foul_tip" |
                            description == "foul_bunt") %>% filter(balls == 0 & strikes == 0))/
   nrow(wmyers20_R %>% filter(balls == 0 & strikes == 0))
+  
+ #Create spray charts vs RHP separated by pitch type and colored by batted ball type
+spray_chart(wmyers19_bip %>% filter(p_throws == "R"), aes(hc_x, -hc_y, color = bb_type)) +
+  geom_point() + facet_wrap(~pitch_type, nrow = 3) + labs(title = "Myers 2019 Balls in Play vs RHP") +
+  easy_add_legend_title("Batted Ball Type")
+spray_chart(wmyers20_bip %>% filter(p_throws == "R"), aes(hc_x, -hc_y, color = bb_type)) +
+  geom_point() + facet_wrap(~pitch_type, nrow = 3) + labs(title = "Myers 2020 Balls in Play vs RHP") +
+  easy_add_legend_title("Batted Ball Type")
 
-
+#Create pitch percentage by count vs RHP
 
 
 
