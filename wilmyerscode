@@ -65,8 +65,8 @@ ggplot(wmyers19_bip, aes(launch_speed, launch_angle)) + geom_point(aes(color = e
   xlim(c(40,110)) -> wmyers20_LA_EV
 
 #find "sweet spot" % and hard hit%
-nrow(wmyers19_bip %>% filter(launch_angle >= 25 & launch_angle <= 35))/nrow(wmyers19_bip)
-nrow(wmyers20_bip %>% filter(launch_angle >= 25 & launch_angle <= 35))/nrow(wmyers20_bip)
+nrow(wmyers19_bip %>% filter(launch_angle >= 8 & launch_angle <= 32))/nrow(wmyers19_bip)
+nrow(wmyers20_bip %>% filter(launch_angle >= 8 & launch_angle <= 32))/nrow(wmyers20_bip)
 
 nrow(wmyers19_bip %>% filter(launch_speed >= 95))/nrow(wmyers19_bip)
 nrow(wmyers20_bip %>% filter(launch_speed >= 95))/nrow(wmyers20_bip)
