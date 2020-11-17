@@ -107,6 +107,25 @@ ggplot(wmyers_pct_combinedR, aes(reorder(pitch_type, -pct), pct, fill = year)) +
   labs(title = "Myers Pitch Distribution Seen Vs RHP") + 
   theme(plot.title = element_text(face = "bold", hjust = .5)) -> wmyers19_R_pct_chart
 
+#Find pitch distribution based on count vs RHP
+round(prop.table(table(wmyers19_R$pitch_type, wmyers19_R$count),
+                 margin = 2), 2) -> wmyers19_countsR
+round(prop.table(table(wmyers20_R$pitch_type, wmyers20_R$count),
+                 margin = 2), 2) -> wmyers20_countsR
+
+#find first pitch swing % vs R
+nrow(wmyers19_R %>% filter(description == "swinging_strike" | description == "hit_into_play" |
+                      description == "foul" | description == "hit_into_play_no_out" |
+                      description == "hit_into_play_score" | description == "foul_tip" |
+                      description == "foul_bunt") %>% filter(balls == 0 & strikes == 0))/
+  nrow(wmyers19_R %>% filter(balls == 0 & strikes == 0))
+
+nrow(wmyers20_R %>% filter(description == "swinging_strike" | description == "hit_into_play" |
+                           description == "foul" | description == "hit_into_play_no_out" |
+                           description == "hit_into_play_score" | description == "foul_tip" |
+                           description == "foul_bunt") %>% filter(balls == 0 & strikes == 0))/
+  nrow(wmyers20_R %>% filter(balls == 0 & strikes == 0))
+
 #create strike zone heat map function
 k_zone_heatmap <- function(...) {
   k_zone_plot(...) +
@@ -140,25 +159,6 @@ wmyers20_R %>%
   facet_wrap(~pitch_type, nrow = 3) +
   easy_add_legend_title("Swing and Miss?\n(yellow = Density)") +
   labs(title = "Myers 2020 Pitches Seen vs RHP")
-
-#find first pitch swing % vs R
-nrow(wmyers19_R %>% filter(description == "swinging_strike" | description == "hit_into_play" |
-                      description == "foul" | description == "hit_into_play_no_out" |
-                      description == "hit_into_play_score" | description == "foul_tip" |
-                      description == "foul_bunt") %>% filter(balls == 0 & strikes == 0))/
-  nrow(wmyers19_R %>% filter(balls == 0 & strikes == 0))
-
-nrow(wmyers20_R %>% filter(description == "swinging_strike" | description == "hit_into_play" |
-                           description == "foul" | description == "hit_into_play_no_out" |
-                           description == "hit_into_play_score" | description == "foul_tip" |
-                           description == "foul_bunt") %>% filter(balls == 0 & strikes == 0))/
-  nrow(wmyers20_R %>% filter(balls == 0 & strikes == 0))
-  
- #Find pitch distribution based on count vs RHP
-round(prop.table(table(wmyers19_R$pitch_type, wmyers19_R$count),
-                 margin = 2), 2) -> wmyers19_countsR
-round(prop.table(table(wmyers20_R$pitch_type, wmyers20_R$count),
-                 margin = 2), 2) -> wmyers20_countsR
  
  #Create spray charts vs RHP separated by pitch type and colored by batted ball type
 spray_chart(wmyers19_bip %>% filter(p_throws == "R"), aes(hc_x, -hc_y, color = bb_type)) +
